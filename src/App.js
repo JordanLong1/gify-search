@@ -1,23 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useState, useEffect} from 'react'
 
 function App() {
+
+  const [input, setInput] = useState(''); 
+  const [term, setTerm] = useState(''); 
+  const [results, setResults] = useState([]); 
+
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); 
+    setTerm(input)
+    setInput('')
+  }
+
+  useEffect(() => {
+
+    const fetchGifs = async () => {
+      
+      const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=INSERT_YOUR_OWN_KEY=${term}&limit=10&offset=0&rating=g&lang=en`)
+      const data = await response.json();
+      setResults(data.data.map(gif => gif.images.preview.mp4));
+    }
+    if (term !=='') {
+      fetchGifs()
+    }
+  }, [term])
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+      <form onSubmit={handleSubmit}>
+     <input type='text' value={input} onChange={(e) => setInput(e.target.value)} placeholder='Search for a Gif!' />
+    <button type='submit'>Submit</button>
+      {results.map(gif => <video autoPlay loop key={gif} src={gif} alt='' />)}
+      </form>
     </div>
   );
 }
